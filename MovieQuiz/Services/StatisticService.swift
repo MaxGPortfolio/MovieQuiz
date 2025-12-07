@@ -43,6 +43,21 @@ final class StatisticService: StatisticServiceProtocol {
         }
     }
     
+    var correctAnswers: Int {
+        totalCorrectAnswers
+    }
+
+    var questionsAsked: Int {
+        totalQuestionsAsked
+    }
+    
+    var totalAccuracy: Double {
+        let correct = totalCorrectAnswers
+        let total = totalQuestionsAsked
+        guard total > 0 else { return 0 }
+        return Double(correct) / Double(total) * 100
+    }
+
     private var totalCorrectAnswers: Int {
         get { storage.integer(forKey: Keys.totalCorrectAnswers.rawValue) }
         set { storage.set(newValue, forKey: Keys.totalCorrectAnswers.rawValue) }
@@ -51,13 +66,6 @@ final class StatisticService: StatisticServiceProtocol {
     private var totalQuestionsAsked: Int {
         get { storage.integer(forKey: Keys.totalQuestionsAsked.rawValue) }
         set { storage.set(newValue, forKey: Keys.totalQuestionsAsked.rawValue) }
-    }
-
-    var totalAccuracy: Double {
-        let correct = totalCorrectAnswers
-        let total = totalQuestionsAsked
-        guard total > 0 else { return 0 }
-        return Double(correct) / Double(total) * 100
     }
     
     func store(correct count: Int, total amount: Int) {
@@ -72,5 +80,4 @@ final class StatisticService: StatisticServiceProtocol {
             bestGame = currentGame
         }
     }
-    
 }
