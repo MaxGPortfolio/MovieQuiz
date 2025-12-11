@@ -29,6 +29,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         static let borderWidth: CGFloat = 8
         static let answerDelay: TimeInterval = 1.0
     }
+    
+    private enum AlertTextNetworkIssue {
+        static let networkErrorTitle = "Что-то пошло не так("
+        static let networkErrorMessage = "Невозможно загрузить данные"
+        static let retryButton = "Попробовать еще раз"
+    }
 
     // MARK: - Lifecycle
 
@@ -102,11 +108,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         hideLoadingIndicator()
         
         let model = AlertModel(
-            title: "Что-то пошло не так(",
-            message: "Невозможно загрузить данные",
-            buttonText: "Попробовать еще раз"
+            title: AlertTextNetworkIssue.networkErrorTitle,
+            message: AlertTextNetworkIssue.networkErrorMessage,
+            buttonText: AlertTextNetworkIssue.retryButton
         ) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
             self.currentQuestionIndex = 0
             self.correctAnswers = 0

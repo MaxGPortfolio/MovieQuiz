@@ -7,6 +7,11 @@
 
 import Foundation
 
+private enum HTTPStatus {
+    static let successMin = 200
+    static let successMax = 300
+}
+
 struct NetworkClient {
 
     private enum NetworkError: Error {
@@ -24,7 +29,7 @@ struct NetworkClient {
                 return
             }
             if let response = response as? HTTPURLResponse,
-                response.statusCode < 200 || response.statusCode >= 300 {
+                response.statusCode < HTTPStatus.successMin || response.statusCode >= HTTPStatus.successMax {
                 handler(.failure(NetworkError.codeError))
                 return
             }

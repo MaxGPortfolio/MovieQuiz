@@ -8,7 +8,10 @@
 import Foundation
 
 final class QuestionFactory: QuestionFactoryProtocol {
-    
+    private enum ComparisonType {
+        case greater
+        case less
+    }
     private let moviesLoader: MoviesLoading
     private weak var delegate: QuestionFactoryDelegate?
     private var movies: [MostPopularMovie] = []
@@ -32,31 +35,62 @@ final class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
+
+    private func makeQuestion(for movie: MostPopularMovie, imageData: Data) -> QuizQuestion {
+        let rating = Float(movie.rating) ?? 0
+
+        let comparison: ComparisonType = Bool.random() ? .greater : .less
+
+        let threshold: Float
+        switch rating {
+        case 8.5...10:
+            threshold = [8, 9].randomElement()!
+        case 7...8.5:
+            threshold = [6, 7, 8].randomElement()!
+        case 5...7:
+            threshold = [4, 5, 6].randomElement()!
+        default:
+            threshold = [3, 4, 5].randomElement()!
+        }
+
+        let thresholdText = String(Int(threshold))
+
+        let text: String
+        let correctAnswer: Bool
+
+        switch comparison {
+        case .greater:
+            text = "Рейтинг этого фильма больше чем \(thresholdText)?"
+            correctAnswer = rating > threshold
+        case .less:
+            text = "Рейтинг этого фильма меньше чем \(thresholdText)?"
+            correctAnswer = rating < threshold
+        }
+
+        return QuizQuestion(
+            image: imageData,
+            text: text,
+            correctAnswer: correctAnswer
+        )
+    }
     
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
             let index = (0..<self.movies.count).randomElement() ?? 0
-            
+
             guard let movie = self.movies[safe: index] else { return }
-            
+
             var imageData = Data()
-            
+
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
                 print("Failed to load image")
             }
-            
-            let rating = Float(movie.rating) ?? 0
-            
-            let text = "Рейтинг этого фильма больше чем 7?"
-            let correctAnswer = rating > 7
-            
-            let question = QuizQuestion(image: imageData,
-                                        text: text,
-                                        correctAnswer: correctAnswer)
-            
+
+            let question = self.makeQuestion(for: movie, imageData: imageData)
+
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.delegate?.didReceiveNextQuestion(question: question)
