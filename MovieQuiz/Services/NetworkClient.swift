@@ -7,12 +7,16 @@
 
 import Foundation
 
+protocol NetworkRouting {
+    func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void)
+}
+
 private enum HTTPStatus {
     static let successMin = 200
     static let successMax = 300
 }
 
-struct NetworkClient {
+struct NetworkClient: NetworkRouting {
 
     private enum NetworkError: Error {
         case codeError
